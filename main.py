@@ -15,6 +15,11 @@ from transformers import get_cosine_schedule_with_warmup
 from torch.utils.data import DataLoader
 from multiprocessing import Pool, cpu_count
 from torch.amp import GradScaler, autocast
+from accelerate.utils import set_seed
+from torch.distributed import destroy_process_group
+import atexit
+from accelerate import DataLoaderShard
+
 
 CONTEXT_WINDOW = 512
 TARGET_WINDOW = 8
@@ -27,6 +32,18 @@ DATASET = "prithivMLmods/System-Response-100K"
 BLUE_ANSI = "\033[94m"
 RESET_ANSI = "\033[0m"
 GRAY_ANSI = "\033[90m"
+
+
+SEED = 42
+set_seed(SEED)
+
+
+def cleanup():
+    if torch.distributed.is_initialized():
+        destroy_process_group()
+
+
+atexit.register(cleanup)
 
 
 def info(*args):
@@ -68,7 +85,7 @@ info("Data tokenized with tokenizer.")
 dataset = SequenceDataset(CONTEXT_WINDOW, TARGET_WINDOW, data, verbose=True)
 info("Dataset created with", len(dataset), "samples.")
 
-dataloader = DataLoader(
+dataloader = DataLoaderShard(
     dataset,
     batch_size=BATCH_SIZE,
     shuffle=True,
