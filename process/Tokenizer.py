@@ -20,7 +20,7 @@ class BPETokenizer:
         self.tokenizer.decoder = decoders.ByteLevel()
         self.tokenizer.post_processor = processors.ByteLevel()
 
-        self.special_tokens = ["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]"]
+        self.special_tokens = ["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]", "[EOS]"]
 
         self.trainer = trainers.BpeTrainer(
             vocab_size=vocab_size,

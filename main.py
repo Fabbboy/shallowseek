@@ -71,6 +71,9 @@ def collate_fn(batch):
     )
     return contexts, targets
 
+eos = tokenizer.get_eos_token()
+print(f"EOS token: {eos}")
+print(type(eos))
 
 train_dataset = SequenceDataset(
     CONTEXT_LEN,
