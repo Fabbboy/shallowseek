@@ -20,8 +20,12 @@ class BPETokenizer:
         self.tokenizer.decoder = decoders.ByteLevel()
         self.tokenizer.post_processor = processors.ByteLevel()
 
+        self.special_tokens = ["[PAD]", "[UNK]", "[CLS]", "[SEP]", "[MASK]"]
+
         self.trainer = trainers.BpeTrainer(
-            vocab_size=vocab_size, min_frequency=min_frequency
+            vocab_size=vocab_size,
+            min_frequency=min_frequency,
+            special_tokens=self.special_tokens,
         )
 
     def train(self, data: List[str]):
@@ -48,6 +52,6 @@ class BPETokenizer:
 
     def inner_tokenizer(self):
         return self.tokenizer
-    
+
     def get_pad_token(self):
         return self.tokenizer.token_to_id("[PAD]")

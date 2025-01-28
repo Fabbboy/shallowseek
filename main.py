@@ -116,7 +116,9 @@ parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
 print(f"Total parameters (Human): {parameters:,}")
 optimizer = optim.AdamW(model.parameters(), lr=1e-4)
 pad = tokenizer.get_pad_token()
-criterion = nn.CrossEntropyLoss()
+print(f"Pad token: {pad}")
+print(type(pad))
+criterion = nn.CrossEntropyLoss(ignore_index=pad)
 
 model, optimizer, train_loader, valid_loader, criterion = accelerator.prepare(
     model, optimizer, train_loader, valid_loader, criterion
