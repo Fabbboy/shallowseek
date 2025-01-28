@@ -21,7 +21,7 @@ from torch.distributed import destroy_process_group
 import atexit
 
 
-CONTEXT_WINDOW = 512
+CONTEXT_WINDOW = 256
 TARGET_WINDOW = 8
 BATCH_SIZE = 32
 EPOCHS = 10
@@ -62,8 +62,8 @@ device = accelerator.device
 info("Using device:", device)
 
 dataset = load_dataset(DATASET)["train"]
-dataset = dataset.select(range(0, len(dataset), USE))
-train = dataset["question"]  # question column also includes the answer
+train_data = dataset[: len(dataset) // 4]
+train = train_data["question"]  # question column also includes the answer
 info("Loaded dataset with", len(train), "samples.")
 
 tokenizer = BPETokenizer()
