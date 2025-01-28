@@ -1,49 +1,37 @@
 import torch
 import torch.nn as nn
 from .Block import DecoderBlock
+from .PositionalEncoding import PositionalEncoding
+from .Embedding import Embedding
+
 
 class Transformer(nn.Module):
-    """
-    Transformer model with latent attention mechanism.
-
-    Args:
-        d_model (int): Dimensionality of the model.
-        d_ff (int): Dimensionality of the feedforward network.
-        n_head (int): Number of attention heads.
-        num_latents (int): Number of latent vectors for latent attention.
-        num_layers (int): Number of decoder blocks.
-        dropout (float): Dropout probability.
-    """
-
     def __init__(
         self,
+        vocab_size: int,
         d_model: int,
         d_ff: int,
         n_head: int,
         num_latents: int,
         num_layers: int,
-        dropout: float = 0.1,
+        dropout: float,
+        max_len: int = 1000,
     ):
         super(Transformer, self).__init__()
-        self.decoder = nn.ModuleList(
+        self.embedding = Embedding(vocab_size, d_model)
+        self.pos_enc = PositionalEncoding(d_model, max_len)
+        self.layers = nn.ModuleList(
             [
                 DecoderBlock(d_model, d_ff, n_head, num_latents, dropout)
                 for _ in range(num_layers)
             ]
         )
+        self.proj = nn.Linear(d_model, vocab_size)  # Projection layer
 
     def forward(self, x: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
-        """
-        Forward pass for the Transformer model.
-
-        Args:
-            x (Tensor): Input tensor of shape (batch_size, seq_len, d_model).
-            mask (Tensor, optional): Attention mask of shape (batch_size, 1, seq_len, seq_len + num_latents).
-
-        Returns:
-            Tensor: Output tensor of shape (batch_size, seq_len, d_model).
-        """
-        for layer in self.decoder:
+        x = self.embedding(x)
+        x = self.pos_enc(x)
+        for layer in self.layers:
             x = layer(x, mask)
-
+        x = self.proj(x)
         return x

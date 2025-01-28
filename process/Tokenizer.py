@@ -7,6 +7,9 @@ from tokenizers import (
     normalizers,
     processors,
 )
+from typing import List
+
+import tokenizers
 
 
 class BPETokenizer:
@@ -21,20 +24,30 @@ class BPETokenizer:
             vocab_size=vocab_size, min_frequency=min_frequency
         )
 
-    def train(self, files):
-        self.tokenizer.train(files, self.trainer)
+    def train(self, data: List[str]):
+        """
+        Train the tokenizer directly on a list of text strings.
+
+        Args:
+            data (List[str]): The text data to train on.
+        """
+        # Train from memory using an iterator
+        self.tokenizer.train_from_iterator(data, trainer=self.trainer)
 
     def save(self, path):
         self.tokenizer.save(path)
 
-    @classmethod
-    def from_file(cls, path):
-        tokenizer = cls()
-        tokenizer.tokenizer = Tokenizer.from_file(path)
-        return tokenizer
+    def load(self, path):
+        self.tokenizer = Tokenizer.from_file(path)
 
-    def encode(self, text):
+    def encode(self, text) -> tokenizers.Encoding:
         return self.tokenizer.encode(text).ids
 
-    def decode(self, ids):
+    def decode(self, ids: List[int]) -> str:
         return self.tokenizer.decode(ids)
+
+    def inner_tokenizer(self):
+        return self.tokenizer
+    
+    def get_pad_token(self):
+        return self.tokenizer.token_to_id("[PAD]")

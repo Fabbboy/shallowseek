@@ -8,7 +8,8 @@ class SequenceDataset(Dataset):
         self,
         context_window: int,
         target_window: int,
-        data: List[int],
+        data: List[List[int]],
+        pad_token_id: int = 0,
         verbose: bool = False,
     ):
         """
@@ -17,16 +18,18 @@ class SequenceDataset(Dataset):
         Args:
             context_window (int): Number of context tokens in each sample.
             target_window (int): Number of target tokens in each sample.
-            data (List[int]): The raw data to process into sequences.
-            verbose (bool): Whether to display a progress bar during initialization.
+            data (List[List[int]]): The tokenized data to process into sequences.
+            pad_token_id (int): Token ID used for padding.
+            verbose (bool): Whether to display initialization details.
         """
         self.context_window = context_window
         self.target_window = target_window
         self.data = data
-        self.verbose = verbose
+        self.pad_token_id = pad_token_id
+        self.verbose = verbose  
 
-        self.total_sequences = (
-            len(self.data) - self.context_window - self.target_window + 1
+        self.total_sequences = sum(
+            max(0, len(seq) - context_window - target_window + 1) for seq in data
         )
 
         if self.verbose:
@@ -51,16 +54,35 @@ class SequenceDataset(Dataset):
         Returns:
             Tuple[torch.Tensor, torch.Tensor]: The context and target tensors.
         """
-        if idx < 0 or idx >= self.total_sequences:
-            raise IndexError(
-                f"Index {idx} is out of range for dataset with {self.total_sequences} samples."
+        cumulative_idx = 0
+
+        # Locate the correct sequence in the data
+        for sequence in self.data:
+            num_sequences = max(
+                0, len(sequence) - self.context_window - self.target_window + 1
             )
+            if idx < cumulative_idx + num_sequences:
+                sequence_idx = idx - cumulative_idx
+                start = sequence_idx
+                context = sequence[start : start + self.context_window]
+                target = sequence[
+                    start + self.context_window : start
+                    + self.context_window
+                    + self.target_window
+                ]
 
-        context = self.data[idx : idx + self.context_window]
-        target = self.data[
-            idx + self.context_window : idx + self.context_window + self.target_window
-        ]
+                # Pad if needed
+                context = context + [self.pad_token_id] * (
+                    self.context_window - len(context)
+                )
+                target = target + [self.pad_token_id] * (
+                    self.target_window - len(target)
+                )
 
-        return torch.tensor(context, dtype=torch.float32), torch.tensor(
-            target, dtype=torch.float32
-        )
+                return torch.tensor(context, dtype=torch.long), torch.tensor(
+                    target, dtype=torch.long
+                )
+
+            cumulative_idx += num_sequences
+
+        raise IndexError("Index out of range.")

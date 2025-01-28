@@ -2,10 +2,9 @@ import torch.nn as nn
 import torch
 import math
 
-
-class PositionalEnconding(nn.Module):
+class PositionalEncoding(nn.Module):
     def __init__(self, d_model: int, max_len: int = 5000):
-        super(PositionalEnconding, self).__init__()
+        super(PositionalEncoding, self).__init__()
         self.d_model = d_model
 
         pe = torch.zeros(max_len, d_model)
