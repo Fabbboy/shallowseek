@@ -18,7 +18,6 @@ from torch.amp import GradScaler, autocast
 from accelerate.utils import set_seed
 from torch.distributed import destroy_process_group
 import atexit
-from accelerate import DataLoaderShard
 
 
 CONTEXT_WINDOW = 512
@@ -85,7 +84,7 @@ info("Data tokenized with tokenizer.")
 dataset = SequenceDataset(CONTEXT_WINDOW, TARGET_WINDOW, data, verbose=True)
 info("Dataset created with", len(dataset), "samples.")
 
-dataloader = DataLoaderShard(
+dataloader = DataLoader(
     dataset,
     batch_size=BATCH_SIZE,
     shuffle=True,
