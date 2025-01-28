@@ -22,8 +22,8 @@ import atexit
 os.environ["NCCL_DEBUG"] = "INFO"  # Enable detailed NCCL logs
 
 
-CONTEXT_WINDOW = 256
-TARGET_WINDOW = 4
+CONTEXT_WINDOW = 512
+TARGET_WINDOW = 8
 BATCH_SIZE = 32
 EPOCHS = 10
 BASE_LR = 5e-4
@@ -63,8 +63,8 @@ device = accelerator.device
 info("Using device:", device)
 
 dataset = load_dataset(DATASET)["train"]
-train_data = dataset[: len(dataset) // 4]
-train = train_data["question"]  # question column also includes the answer
+dataset = dataset.select(range(0, len(dataset), USE))
+train = dataset["question"]  # question column also includes the answer
 info("Loaded dataset with", len(train), "samples.")
 
 tokenizer = BPETokenizer()
