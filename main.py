@@ -1,5 +1,6 @@
 import math
 import os
+from typing import List, Tuple
 from process.Dataset import SequenceDataset
 from tqdm import tqdm
 from process.Tokenizer import BPETokenizer
@@ -32,6 +33,7 @@ DATASET = "prithivMLmods/System-Response-100K"
 BLUE_ANSI = "\033[94m"
 RESET_ANSI = "\033[0m"
 GRAY_ANSI = "\033[90m"
+
 
 def cleanup():
     if torch.distributed.is_initialized():
@@ -86,11 +88,30 @@ info("Data tokenized with tokenizer.")
 dataset = SequenceDataset(CONTEXT_WINDOW, TARGET_WINDOW, data, verbose=True)
 info("Dataset created with", len(dataset), "samples.")
 
+
+def collate_fn(
+    batch: List[Tuple[torch.Tensor, torch.Tensor]],
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """
+    Collate a batch of samples into padded tensors.
+
+    Args:
+        batch (List[Tuple[torch.Tensor, torch.Tensor]]): A batch of context-target pairs.
+
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor]: Batched and padded context and target tensors.
+    """
+    contexts, targets = zip(*batch)
+    context_padded = torch.stack(contexts)
+    target_padded = torch.stack(targets)
+    return context_padded, target_padded
+
+
 dataloader = DataLoader(
     dataset,
     batch_size=BATCH_SIZE,
     shuffle=True,
-    collate_fn=SequenceDataset.collate_fn,
+    collate_fn=collate_fn,
 )
 
 info("Dataloader created with", len(dataloader), "batches.")
@@ -129,7 +150,9 @@ torch.autograd.set_detect_anomaly(True)
 debug(f"Autocast device: {str(device)}")
 scaler = GradScaler(device=str(device), enabled=True)
 
-model, optimizer, dataloader = accelerator.prepare(model, optimizer, dataloader)
+model, optimizer, dataloader, scaler = accelerator.prepare(
+    model, optimizer, dataloader, scaler
+)
 info("Starting training...")
 
 
