@@ -30,15 +30,15 @@ train_data, valid = load_dat()
 
 model_args = TransformerArgs(
     vocab_size=15000,
-    d_model=512,
-    d_ff=2048,
+    d_model=256,
+    d_ff=1024,
     n_head=8,
     num_latents=16,
     num_layers=4,
     dropout=0.1,
 )
 
-accelerator = accelerate.Accelerator(mixed_precision="fp16")  # Changed to fp16
+accelerator = accelerate.Accelerator()
 device = accelerator.device
 
 # Tokenize the dataset
@@ -55,7 +55,7 @@ train_data = [
 ]
 valid = [encoding.ids for encoding in tokenizer.inner_tokenizer().encode_batch(valid)]
 
-BATCH_SIZE = 64 + 24
+BATCH_SIZE = 64
 CONTEXT_LEN = 256
 TARGET_LEN = 4
 EPOCHS = 10
@@ -73,10 +73,20 @@ def collate_fn(batch):
 
 
 train_dataset = SequenceDataset(
-    CONTEXT_LEN, TARGET_LEN, train_data, tokenizer.get_pad_token(), verbose=True
+    CONTEXT_LEN,
+    TARGET_LEN,
+    train_data,
+    tokenizer.get_pad_token(),
+    tokenizer.get_eos_token(),
+    verbose=True,
 )
 valid_dataset = SequenceDataset(
-    CONTEXT_LEN, TARGET_LEN, valid, tokenizer.get_pad_token(), verbose=True
+    CONTEXT_LEN,
+    TARGET_LEN,
+    valid,
+    tokenizer.get_pad_token(),
+    tokenizer.get_eos_token(),
+    verbose=True,
 )
 
 train_loader = torch.utils.data.DataLoader(
@@ -101,11 +111,11 @@ model = Transformer(
 
 parameters = sum(p.numel() for p in model.parameters() if p.requires_grad)
 print(f"Total parameters (Human): {parameters:,}")
-optimizer = optim.AdamW(model.parameters(), lr=1e-3)
+optimizer = optim.AdamW(model.parameters(), lr=5e-5)
 pad = tokenizer.get_pad_token()
 print(f"Pad token: {pad}")
 print(type(pad))
-criterion = nn.CrossEntropyLoss()
+criterion = nn.CrossEntropyLoss(ignore_index=pad)
 
 model, optimizer, train_loader, valid_loader, criterion = accelerator.prepare(
     model, optimizer, train_loader, valid_loader, criterion

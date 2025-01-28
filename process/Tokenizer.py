@@ -55,3 +55,6 @@ class BPETokenizer:
 
     def get_pad_token(self):
         return self.tokenizer.token_to_id("[PAD]")
+
+    def get_eos_token(self):
+        return self.tokenizer.token_to_id("[EOS]")

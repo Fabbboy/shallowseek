@@ -10,6 +10,7 @@ class SequenceDataset(Dataset):
         target_window: int,
         data: List[List[int]],
         pad_token_id: int = 0,
+        eos_token_id: int = 1,
         verbose: bool = False,
     ):
         """
@@ -20,16 +21,20 @@ class SequenceDataset(Dataset):
             target_window (int): Number of target tokens in each sample.
             data (List[List[int]]): The tokenized data to process into sequences.
             pad_token_id (int): Token ID used for padding.
+            eos_token_id (int): Token ID used for EOS (End Of Sequence).
             verbose (bool): Whether to display initialization details.
         """
         self.context_window = context_window
         self.target_window = target_window
-        self.data = data
+        self.data = [
+            sequence + [eos_token_id] for sequence in data
+        ]  # Add EOS token to each sequence
         self.pad_token_id = pad_token_id
-        self.verbose = verbose  
+        self.eos_token_id = eos_token_id
+        self.verbose = verbose
 
         self.total_sequences = sum(
-            max(0, len(seq) - context_window - target_window + 1) for seq in data
+            max(0, len(seq) - context_window - target_window + 1) for seq in self.data
         )
 
         if self.verbose:
@@ -71,7 +76,7 @@ class SequenceDataset(Dataset):
                     + self.target_window
                 ]
 
-                # Pad if needed
+                # Pad context and target if needed
                 context = context + [self.pad_token_id] * (
                     self.context_window - len(context)
                 )
