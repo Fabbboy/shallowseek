@@ -153,8 +153,8 @@ torch.autograd.set_detect_anomaly(True)
 debug(f"Autocast device: {str(device)}")
 scaler = GradScaler(device=str(device), enabled=True)
 
-model, optimizer, dataloader, scaler = accelerator.prepare(
-    model, optimizer, dataloader, scaler
+model, optimizer, dataloader = accelerator.prepare(
+    model, optimizer, dataloader
 )
 info("Starting training...")
 
