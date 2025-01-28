@@ -1,21 +1,20 @@
-from dataclasses import dataclass
 import torch
+
+from ..ModelArgs import TransformerArgs
 from ..Block import DecoderBlock
 from ..helper import getDevice
 
 
-@dataclass
-class ModelArgs:
-    d_model: int
-    d_ff: int
-    n_head: int
-    num_latents: int
-    dropout: float
-    device = getDevice()
-
-
 def test_DecoderBlock():
-    model_args = ModelArgs(d_model=64, d_ff=128, n_head=8, num_latents=16, dropout=0.1)
+    model_args = TransformerArgs(
+        d_model=64,
+        d_ff=256,
+        n_head=8,
+        num_latents=16,
+        num_layers=4,
+        dropout=0.1,
+        device=getDevice(),
+    )
 
     model = DecoderBlock(
         d_model=model_args.d_model,

@@ -1,40 +1,24 @@
 import torch
 from ..MultiHeadLatentAttention import MultiHeadLatentAttention
-from dataclasses import dataclass
-
-from helper import causal_mask, getDevice
-
-
-@dataclass
-class ModelArgs:
-    """
-    Data class for storing model configuration parameters.
-
-    Attributes:
-        d_model (int): Dimensionality of the model.
-        num_heads (int): Number of attention heads.
-        num_latents (int): Number of latent vectors.
-        dropout (float): Dropout probability.
-    """
-
-    d_model: int
-    num_heads: int
-    num_latents: int
-    dropout: float = 0.1
+from ..ModelArgs import TransformerArgs
+from ..helper import causal_mask, getDevice
 
 
 def test_MultiHeadLatentAttention():
-    model_args = ModelArgs(
+    model_args = TransformerArgs(
+        vocab_size=1000,  # Not used here, but required by TransformerArgs
         d_model=64,
-        num_heads=8,
+        d_ff=256,  # Not used here, but part of TransformerArgs
+        n_head=8,
         num_latents=16,
+        num_layers=4,  # Not used here, but part of TransformerArgs
         dropout=0.1,
     )
 
     device = getDevice()
     model = MultiHeadLatentAttention(
         d_model=model_args.d_model,
-        num_heads=model_args.num_heads,
+        num_heads=model_args.n_head,
         num_latents=model_args.num_latents,
         dropout=model_args.dropout,
     ).to(device)
@@ -55,11 +39,11 @@ def test_MultiHeadLatentAttention():
 
     assert attn_probs.shape == (
         batch_size,
-        model_args.num_heads,
+        model_args.n_head,
         seq_len,
         seq_len + model_args.num_latents,
     ), (
-        f"Expected attn_probs shape {(batch_size, model_args.num_heads, seq_len, seq_len + model_args.num_latents)}, "
+        f"Expected attn_probs shape {(batch_size, model_args.n_head, seq_len, seq_len + model_args.num_latents)}, "
         f"got {attn_probs.shape}"
     )
 
