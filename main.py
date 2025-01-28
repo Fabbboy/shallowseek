@@ -19,6 +19,14 @@ from accelerate.utils import set_seed
 from torch.distributed import destroy_process_group
 import atexit
 
+os.environ["NCCL_DEBUG"] = "INFO"  # Enable detailed NCCL logs
+os.environ["NCCL_BLOCKING_WAIT"] = "1"  # Block until NCCL operations are complete
+os.environ["NCCL_P2P_DISABLE"] = "1"  # Disable peer-to-peer communication
+os.environ["NCCL_IB_DISABLE"] = "1"  # Disable InfiniBand if not in use
+os.environ["NCCL_NET_GDR_LEVEL"] = "0"  # Reduce GPU Direct RDMA level
+os.environ["NCCL_ALGO"] = "Ring"  # Use Ring algorithm (more stable for multi-node setups)
+os.environ["NCCL_PROTO"] = "Simple"  # Use simpler protocol
+
 
 CONTEXT_WINDOW = 256
 TARGET_WINDOW = 4
