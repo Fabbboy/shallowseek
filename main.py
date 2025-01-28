@@ -25,17 +25,13 @@ TARGET_WINDOW = 8
 BATCH_SIZE = 32
 EPOCHS = 10
 BASE_LR = 5e-4
+SEED = 42
 WARMUP_STEPS = 1000
 DATASET = "prithivMLmods/System-Response-100K"
 
 BLUE_ANSI = "\033[94m"
 RESET_ANSI = "\033[0m"
 GRAY_ANSI = "\033[90m"
-
-
-SEED = 42
-set_seed(SEED)
-
 
 def cleanup():
     if torch.distributed.is_initialized():
@@ -54,6 +50,12 @@ def debug(*args):
 
 
 accelerator = accelerate.Accelerator()
+if accelerator.is_main_process:
+    info("Setting seed for RNG synchronization")
+torch.manual_seed(SEED)
+torch.cuda.manual_seed_all(SEED)
+
+
 device = accelerator.device
 info("Using device:", device)
 
