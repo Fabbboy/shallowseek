@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 import torch
-from .Block import DecoderBlock
-from .helper import getDevice
+from ..Block import DecoderBlock
+from ..helper import getDevice
 
 
 @dataclass

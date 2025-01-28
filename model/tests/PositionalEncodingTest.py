@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import torch
-from .PositionalEncoding import PositionalEnconding
+from ..PositionalEncoding import PositionalEnconding
 
 
 @dataclass

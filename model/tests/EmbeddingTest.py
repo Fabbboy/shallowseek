@@ -1,5 +1,5 @@
 import torch
-from .Embedding import Embedding
+from ..Embedding import Embedding
 
 def test_Embedding():
     vocab_size = 1000
