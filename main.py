@@ -1,6 +1,8 @@
 import os
 from process.Dataset import SequenceDataset
 from tqdm import tqdm
+
+from torch.cuda.amp import autocast
 from process.Tokenizer import BPETokenizer
 from datasets import load_dataset
 from model.helper import causal_mask
@@ -36,7 +38,7 @@ model_args = TransformerArgs(
     dropout=0.1,
 )
 
-accelerator = accelerate.Accelerator()
+accelerator = accelerate.Accelerator(mixed_precision="no")
 device = accelerator.device
 
 
@@ -126,6 +128,7 @@ def train_step(batch):
 
     optimizer.zero_grad()
     mask = causal_mask(CONTEXT_LEN, model_args.num_latents, device=device)
+
 
     output = model(context, mask)
 
