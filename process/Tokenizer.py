@@ -9,8 +9,6 @@ from tokenizers import (
 )
 from typing import List
 
-import tokenizers
-
 
 class BPETokenizer:
     def __init__(self, vocab_size=30000, min_frequency=2):
@@ -44,7 +42,7 @@ class BPETokenizer:
     def load(self, path):
         self.tokenizer = Tokenizer.from_file(path)
 
-    def encode(self, text) -> tokenizers.Encoding:
+    def encode(self, text) -> List[int]:
         return self.tokenizer.encode(text).ids
 
     def decode(self, ids: List[int]) -> str:

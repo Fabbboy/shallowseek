@@ -22,6 +22,5 @@ def causal_mask(seq_len, num_latents, device=None):
 
     return full_mask.unsqueeze(0).unsqueeze(0)
 
-
 def getDevice():
     return torch.device("cuda" if torch.cuda.is_available() else "cpu")

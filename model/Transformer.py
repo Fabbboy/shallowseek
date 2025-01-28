@@ -1,12 +1,14 @@
 import torch
 import torch.nn as nn
+
+from .ModelArgs import TransformerArgs
 from .Block import DecoderBlock
 from .PositionalEncoding import PositionalEncoding
 from .Embedding import Embedding
 
 
 class Transformer(nn.Module):
-    def __init__(
+    """def __init__(
         self,
         vocab_size: int,
         d_model: int,
@@ -27,6 +29,21 @@ class Transformer(nn.Module):
             ]
         )
         self.proj = nn.Linear(d_model, vocab_size)  # Projection layer
+    """
+
+    def __init__(self, args: TransformerArgs):
+        super(Transformer, self).__init__()
+        self.embedding = Embedding(args.vocab_size, args.d_model)
+        self.pos_enc = PositionalEncoding(args.d_model, args.max_len)
+        self.layers = nn.ModuleList(
+            [
+                DecoderBlock(
+                    args.d_model, args.d_ff, args.n_head, args.num_latents, args.dropout
+                )
+                for _ in range(args.num_layers)
+            ]
+        )
+        self.proj = nn.Linear(args.d_model, args.vocab_size)
 
     def forward(self, x: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
         x = self.embedding(x)
