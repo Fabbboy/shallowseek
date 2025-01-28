@@ -14,7 +14,6 @@ import torch.optim as optim
 import accelerate
 from transformers import get_cosine_schedule_with_warmup
 from torch.utils.data import DataLoader
-from multiprocessing import Pool, cpu_count
 from torch.amp import GradScaler, autocast
 from accelerate.utils import set_seed
 from torch.distributed import destroy_process_group
@@ -177,6 +176,8 @@ def train_step(context, target):
             debug("Context:", context)
             debug("Mask:", mask)
             raise ValueError("Loss is NaN")
+        
+    info(f"Context size: {context.size()}, Target size: {target.size()}")
 
     accelerator.backward(loss)
 
