@@ -76,14 +76,16 @@ info("Tokenizer saved to tokenizer.json.")
 debug("Sample enconding", tokenizer.encode(train[0]))
 
 
-def encode_sample(sample):
+""" def encode_sample(sample):
     return tokenizer.encode(sample)
 
 
 info("Encoding dataset...")
 num_workers = cpu_count()
 with Pool(num_workers) as pool:
-    data = list(tqdm(pool.imap(encode_sample, train), total=len(train)))
+    data = list(tqdm(pool.imap(encode_sample, train), total=len(train))) """
+
+data = [tokenizer.encode(sample) for sample in train]
 
 info("Data tokenized with tokenizer.")
 dataset = SequenceDataset(CONTEXT_WINDOW, TARGET_WINDOW, data, verbose=True)
