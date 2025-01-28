@@ -29,6 +29,7 @@ BASE_LR = 5e-4
 SEED = 42
 WARMUP_STEPS = 1000
 DATASET = "prithivMLmods/System-Response-100K"
+USE = 4  # data // USE
 
 BLUE_ANSI = "\033[94m"
 RESET_ANSI = "\033[0m"
@@ -54,14 +55,14 @@ def debug(*args):
 accelerator = accelerate.Accelerator()
 if accelerator.is_main_process:
     info("Setting seed for RNG synchronization")
-torch.manual_seed(SEED)
-torch.cuda.manual_seed_all(SEED)
+set_seed(SEED)
 
 
 device = accelerator.device
 info("Using device:", device)
 
 dataset = load_dataset(DATASET)["train"]
+dataset = dataset.select(range(0, len(dataset), USE))
 train = dataset["question"]  # question column also includes the answer
 info("Loaded dataset with", len(train), "samples.")
 
