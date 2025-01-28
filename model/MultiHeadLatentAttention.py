@@ -49,7 +49,9 @@ class MultiHeadLatentAttention(nn.Module):
         scores = torch.matmul(Q, K.transpose(-2, -1)) / math.sqrt(d_k)
         
         if mask is not None:
-            scores = scores.masked_fill(mask == 0, -1e9)
+            ##scores = scores.masked_fill(mask == 0, -1e9) 
+            #use a smaller value for fp16
+            scores = scores.masked_fill(mask == 0, -1e4)
         
         attn_probs = F.softmax(scores, dim=-1)
         attn_probs = self.dropout(attn_probs)
