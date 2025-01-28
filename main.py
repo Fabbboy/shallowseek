@@ -132,12 +132,12 @@ for batch in dataloader:
 
 model_args = TransformerArgs(
     vocab_size=tokenizer.inner_tokenizer().get_vocab_size(),
-    d_model=512,
-    d_ff=2048,
+    d_model=256,
+    d_ff=1024,
     n_head=8,
     num_latents=64,
     num_layers=6,
-    dropout=0.1,
+    dropout=0.2,
     max_len=CONTEXT_WINDOW,
 )
 
