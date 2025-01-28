@@ -1,5 +1,5 @@
 import torch
-from MultiHeadLatentAttention import MultiHeadLatentAttention
+from .MultiHeadLatentAttention import MultiHeadLatentAttention
 from dataclasses import dataclass
 
 from helper import causal_mask, getDevice

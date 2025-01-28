@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 import torch
-from FeedForward import FeedForward
+from .FeedForward import FeedForward
 
 
 @dataclass
